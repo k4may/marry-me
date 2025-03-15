@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import PresenteCard from "../components/PresenteCard";
 import Filtros from "../components/Filtros";
 import LoadingSpinner from "../components/LoadingSpinner";
+import "../src/app/globals.css";
+import Footer from "../components/Footer";
 
 interface Presente {
   nome: string;
@@ -128,7 +130,7 @@ const PresentesPage = () => {
       </Head>
       <div
         style={{
-          padding: "40px",
+          padding: "20px",
           background: "linear-gradient(135deg, #F5F5F5, #E0E0E0)",
           minHeight: "100vh",
           fontFamily: "'Roboto', sans-serif",
@@ -136,15 +138,12 @@ const PresentesPage = () => {
           backgroundAttachment: "fixed",
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: "30px" }}>
+        <div className="flex justify-center items-center mb-8">
           <img
             src="/brasao-casamento.png"
             alt="Brasão do Casamento"
             onClick={() => handleClick("/")}
-            style={{
-              width: "240px",
-              height: "auto",
-            }}
+            className="w-60 h-auto"
           />
         </div>
 
@@ -188,8 +187,11 @@ const PresentesPage = () => {
             ))}
           </div>
         )}
+         <Footer />
       </div>
+     
     </>
+    
   );
 };
 
