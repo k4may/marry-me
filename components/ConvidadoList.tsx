@@ -15,18 +15,15 @@ export const ConvidadoList = ({
   confirmacoes,
   toggleConfirmacao,
 }: ConvidadoListProps) => {
-  // Filtra os convidados que ainda não confirmaram presença
   const convidadosPendentes = convidados.filter((convidado) => !convidado.confirmado);
 
-  // Verifica se há convidados que já confirmaram presença
   const convidadosConfirmados = convidados.filter((convidado) => convidado.confirmado);
 
   return (
     <div style={{ textAlign: "left", marginBottom: "20px" }}>
-      {/* Lista de convidados pendentes */}
       {convidadosPendentes.length > 0 && (
         <>
-          <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "10px", color: "#333" }}>
+          <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "10px", color: "#333", textAlign: "center" }}>
             Confirme sua presença
           </h2>
           {convidadosPendentes.map((convidado) => (
@@ -56,10 +53,9 @@ export const ConvidadoList = ({
         </>
       )}
 
-      {/* Mensagem de agradecimento para convidados confirmados */}
       {convidadosConfirmados.length > 0 && (
         <div style={{ marginTop: "20px" }}>
-          <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "10px", color: "#333" }}>
+          <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "10px", color: "#333", textAlign: "center" }}>
             Obrigado por confirmar!
           </h2>
           {convidadosConfirmados.map((convidado) => (
@@ -67,7 +63,7 @@ export const ConvidadoList = ({
               key={convidado.nome}
               style={{
                 padding: "10px",
-                background: "#E8F5E9", // Verde claro para indicar sucesso
+                background: "#E8F5E9", 
                 borderRadius: "5px",
                 marginBottom: "10px",
               }}
