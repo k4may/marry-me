@@ -19,7 +19,7 @@ const IconCircle = ({ icon, label, onClick, href }: IconCircleProps) => {
         justifyContent: "center",
         alignItems: "center",
         color: "#4A148C",
-        fontSize: "24px",
+        fontSize: label.length > 10 ? "13px" : "16px",
         cursor: "pointer",
         position: "relative",
       }}
@@ -46,7 +46,7 @@ const IconCircle = ({ icon, label, onClick, href }: IconCircleProps) => {
         />
         <text
           fill="#4A148C"
-          fontSize="16"
+          fontSize={label.length > 13 ? "13px" : "16px"}
           fontFamily="Arial, sans-serif"
         >
           <textPath href="#circlePath" startOffset="25%" textAnchor="middle">

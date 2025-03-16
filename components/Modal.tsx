@@ -41,9 +41,29 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
           maxWidth: "500px",
           width: "100%",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+          position: "relative", // Adicionando posicionamento relativo
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Botão de Fechar */}
+        <button
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "10px",
+            background: "transparent",
+            border: "none",
+            fontSize: "20px",
+            color: "#333",
+            cursor: "pointer",
+            padding: "5px 10px",
+            borderRadius: "50%",
+          }}
+        >
+          &times;
+        </button>
+
         {children}
       </div>
     </div>
