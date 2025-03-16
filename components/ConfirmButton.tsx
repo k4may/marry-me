@@ -9,17 +9,40 @@ export const ConfirmButton = ({ isLoading, onClick }: ConfirmButtonProps) => {
   return (
     <button
       onClick={onClick}
-      className="flex items-center justify-center mx-auto px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+      style={{
+        backgroundColor: "#82CECA",
+        color: "#FFF",
+        padding: "10px 20px",
+        border: "none",
+        borderRadius: "8px",
+        cursor: "pointer",
+        fontSize: "16px",
+        transition: "background-color 0.2s ease, transform 0.2s ease-in-out",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        fontWeight: "bold",
+        boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+      }}
       disabled={isLoading}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = "#396278";
+        e.currentTarget.style.transform = "translateY(-3px)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = "#82CECA";
+        e.currentTarget.style.transform = "translateY(0)";
+      }}
     >
       {isLoading ? (
         <>
-          <FaSpinner className="animate-spin mr-2" />
+          <FaSpinner className="animate-spin" style={{ marginRight: "8px" }} />
           Enviando...
         </>
       ) : (
         <>
-          <FaCheck className="mr-2" /> Confirmar Presença
+          <FaCheck style={{ marginRight: "8px" }} /> Confirmar Presença
         </>
       )}
     </button>
