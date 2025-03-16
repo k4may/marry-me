@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { GetServerSideProps } from "next";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { useState } from "react";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import "../../src/app/globals.css";
 import Footer from "../../components/Footer";
@@ -9,13 +8,13 @@ import dynamic from "next/dynamic";
 import { Header } from "../../components/Header";
 import { ConvidadoList } from "../../components/ConvidadoList";
 import { ConfirmButton } from "../../components/ConfirmButton";
-
 import {
   FaWhatsapp,
   FaMapMarkerAlt,
   FaInstagram,
   FaPhone,
 } from "react-icons/fa";
+import { GetServerSideProps } from "next";
 
 // Import the map component with dynamic loading (no SSR)
 const VenueMap = dynamic(() => import("../../components/VenueMap"), {
@@ -37,8 +36,8 @@ const VenueMap = dynamic(() => import("../../components/VenueMap"), {
 
 interface Convidado {
   nome: string;
-    id: string;
-    confirmado: boolean;
+  id: string;
+  confirmado: boolean;
 }
 
 interface ConvitePageProps {
@@ -46,58 +45,79 @@ interface ConvitePageProps {
   error?: string;
 }
 
-const ConvitePage = ({ convidados, error }: ConvitePageProps) => {
-    const router = useRouter();
-    const { id } = router.query;
-  
-    const [confirmacoes, setConfirmacoes] = useState<{ [key: string]: boolean }>(() => {
-      const initialConfirmacoes: { [key: string]: boolean } = {};
-      convidados.forEach((convidado) => {
-        initialConfirmacoes[convidado.nome] = convidado.confirmado;
-      });
-      return initialConfirmacoes;
+const ConvitePage = ({ convidados: initialConvidados, error }: ConvitePageProps) => {
+  const router = useRouter();
+  const { id } = router.query;
+
+  const [convidados, setConvidados] = useState<Convidado[]>(initialConvidados);
+  const [confirmacoes, setConfirmacoes] = useState<{ [key: string]: boolean }>(() => {
+    const initialConfirmacoes: { [key: string]: boolean } = {};
+    initialConvidados.forEach((convidado) => {
+      initialConfirmacoes[convidado.nome] = convidado.confirmado;
     });
-  
-    const [isLoading, setIsLoading] = useState(false);
-  
-    const toggleConfirmacao = (nome: string) => {
-      setConfirmacoes((prev) => ({
-        ...prev,
-        [nome]: !prev[nome],
-      }));
-    };
-  
-    const enviarConfirmacoes = async () => {
-      setIsLoading(true);
-  
-      try {
-        const confirmados = Object.keys(confirmacoes).filter((nome) => confirmacoes[nome]);
-  
-        for (const nome of confirmados) {
-          const convidado = convidados.find((c) => c.nome === nome);
-          if (convidado) {
-            await fetch("/api/convite", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                nome: convidado.nome,
-                id: convidado.id,
-                confirmado: true, 
-              }),
-            });
+    return initialConfirmacoes;
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Atualiza o estado `convidados` sempre que `initialConvidados` mudar
+  useEffect(() => {
+    setConvidados(initialConvidados);
+    const updatedConfirmacoes: { [key: string]: boolean } = {};
+    initialConvidados.forEach((convidado) => {
+      updatedConfirmacoes[convidado.nome] = convidado.confirmado;
+    });
+    setConfirmacoes(updatedConfirmacoes);
+  }, [initialConvidados]);
+
+  const toggleConfirmacao = (nome: string) => {
+    setConfirmacoes((prev) => ({
+      ...prev,
+      [nome]: !prev[nome],
+    }));
+  };
+
+  const enviarConfirmacoes = async () => {
+    setIsLoading(true);
+
+    try {
+      const confirmados = Object.keys(confirmacoes).filter((nome) => confirmacoes[nome]);
+
+      for (const nome of confirmados) {
+        const convidado = convidados.find((c) => c.nome === nome);
+        if (convidado) {
+          const response = await fetch("/api/convite", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              nome: convidado.nome,
+              id: convidado.id,
+              confirmado: true,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Erro ao confirmar presença");
           }
+
+          // Atualiza o estado local do convidado após a confirmação
+          const updatedConvidados = convidados.map((c) =>
+            c.nome === nome ? { ...c, confirmado: true } : c
+          );
+          setConvidados(updatedConvidados);
         }
-  
-        alert("Confirmações enviadas com sucesso!");
-      } catch (error) {
-        console.error("Erro ao enviar confirmações:", error);
-        alert("Ocorreu um erro ao enviar as confirmações. Tente novamente.");
-      } finally {
-        setIsLoading(false); // Desativa o estado de carregamento
       }
-    };
+
+      alert("Confirmações enviadas com sucesso!");
+    } catch (error) {
+      console.error("Erro ao enviar confirmações:", error);
+      alert("Ocorreu um erro ao enviar as confirmações. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const gerarTitulo = () => {
     if (convidados.length === 1) {
