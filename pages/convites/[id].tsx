@@ -60,6 +60,9 @@ const ConvitePage = ({ convidados: initialConvidados, error }: ConvitePageProps)
 
   const [isLoading, setIsLoading] = useState(false);
 
+  // Verifica se todos os convidados já confirmaram presença
+  const todosConfirmados = convidados.every((convidado) => convidado.confirmado);
+
   // Atualiza o estado `convidados` sempre que `initialConvidados` mudar
   useEffect(() => {
     setConvidados(initialConvidados);
@@ -79,11 +82,12 @@ const ConvitePage = ({ convidados: initialConvidados, error }: ConvitePageProps)
 
   const enviarConfirmacoes = async () => {
     setIsLoading(true);
-
+  
     try {
       const confirmados = Object.keys(confirmacoes).filter((nome) => confirmacoes[nome]);
-
-      for (const nome of confirmados) {
+  
+      // Array para armazenar as promessas das requisições
+      const promises = confirmados.map(async (nome) => {
         const convidado = convidados.find((c) => c.nome === nome);
         if (convidado) {
           const response = await fetch("/api/convite", {
@@ -97,19 +101,31 @@ const ConvitePage = ({ convidados: initialConvidados, error }: ConvitePageProps)
               confirmado: true,
             }),
           });
-
+  
           if (!response.ok) {
-            throw new Error("Erro ao confirmar presença");
+            throw new Error(`Erro ao confirmar presença de ${convidado.nome}`);
           }
-
-          // Atualiza o estado local do convidado após a confirmação
-          const updatedConvidados = convidados.map((c) =>
-            c.nome === nome ? { ...c, confirmado: true } : c
-          );
-          setConvidados(updatedConvidados);
+  
+          return convidado.nome; // Retorna o nome do convidado confirmado
         }
-      }
-
+      });
+  
+      // Aguarda todas as requisições serem concluídas
+      const nomesConfirmados = await Promise.all(promises);
+  
+      // Atualiza o estado local dos convidados após todas as confirmações
+      const updatedConvidados = convidados.map((c) =>
+        nomesConfirmados.includes(c.nome) ? { ...c, confirmado: true } : c
+      );
+      setConvidados(updatedConvidados);
+  
+      // Atualiza o estado `confirmacoes` para refletir as confirmações
+      const updatedConfirmacoes = { ...confirmacoes };
+      nomesConfirmados.forEach((nome) => {
+        if (nome) updatedConfirmacoes[nome] = true;
+      });
+      setConfirmacoes(updatedConfirmacoes);
+  
       alert("Confirmações enviadas com sucesso!");
     } catch (error) {
       console.error("Erro ao enviar confirmações:", error);
@@ -191,7 +207,10 @@ const ConvitePage = ({ convidados: initialConvidados, error }: ConvitePageProps)
               toggleConfirmacao={toggleConfirmacao}
             />
 
-            <ConfirmButton isLoading={isLoading} onClick={enviarConfirmacoes} />
+            {/* Exibe o botão apenas se nem todos os convidados confirmaram */}
+            {!todosConfirmados && (
+              <ConfirmButton isLoading={isLoading} onClick={enviarConfirmacoes} />
+            )}
 
             {/* Local do Casamento */}
             <div style={{ marginTop: "40px", textAlign: "center" }}>
